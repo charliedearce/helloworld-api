@@ -128,11 +128,11 @@ class AuthController extends BaseController
 
         $accessToken = json_decode($this->curlPOST(ENV('APP_URL').'/oauth/token', $data));
 
-        if(!isset($accessToken['access_token'])){
+        if(!isset($accessToken->access_token)){
             return response(['message'=> 'unauthorized']);
         }
 
-        return response(['access_token'=> $accessToken['access_token']]);
+        return response(['access_token'=> $accessToken->access_token]);
     }
 
     public function details()
