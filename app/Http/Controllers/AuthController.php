@@ -79,8 +79,8 @@ class AuthController extends BaseController
                 if($res) {
                     $data = [
                         'grant_type' => 'password',
-                        'client_id' => '2',
-                        'client_secret' => '5W70zakBjjwhC4Ea36IS7JFzJU6naVE0Wa76ap4y',
+                        'client_id' => ENV('AUTH_ID'),
+                        'client_secret' => ENV('AUTH_KEY'),
                         'username' => $fields['email'],
                         'password' => $fields['social_id'],
                         'scope' => '*',
@@ -91,8 +91,8 @@ class AuthController extends BaseController
             } else {
                 $data = [
                     'grant_type' => 'password',
-                    'client_id' => '2',
-                    'client_secret' => '5W70zakBjjwhC4Ea36IS7JFzJU6naVE0Wa76ap4y',
+                    'client_id' => ENV('AUTH_ID'),
+                    'client_secret' => ENV('AUTH_KEY'),
                     'username' => $fields['email'],
                     'password' => $fields['social_id'],
                     'scope' => '*',
@@ -119,8 +119,8 @@ class AuthController extends BaseController
 
         $data = [
                 'grant_type' => 'password',
-                'client_id' => '2',
-                'client_secret' => '5W70zakBjjwhC4Ea36IS7JFzJU6naVE0Wa76ap4y',
+                'client_id' => ENV('AUTH_ID'),
+                'client_secret' => ENV('AUTH_KEY'),
                 'username' => $loginData['email'],
                 'password' => $loginData['password'],
                 'scope' => '*',
@@ -128,7 +128,11 @@ class AuthController extends BaseController
 
         $accessToken = json_decode($this->curlPOST(ENV('APP_URL').'/oauth/token', $data));
 
-        return response(['access_token'=> $accessToken]);
+        if(!isset($accessToken['access_token'])){
+            return response(['message'=> 'unauthorized']);
+        }
+
+        return response(['access_token'=> $accessToken['access_token']]);
     }
 
     public function details()
