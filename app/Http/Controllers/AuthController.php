@@ -126,7 +126,7 @@ class AuthController extends BaseController
                 'scope' => '*',
             ];
 
-        $accessToken = json_decode($this->curlPOST(ENV('APP_URL').'/oauth/token', $data))->access_token;
+        $accessToken = json_decode($this->curlPOST(ENV('APP_URL').'/oauth/token', $data));
 
         return response(['access_token'=> $accessToken]);
     }
