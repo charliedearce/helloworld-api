@@ -18,6 +18,7 @@ class CreateUsersTable extends Migration
             $table->string('social_id')->unique()->nullable();
             $table->string('first_name');
             $table->string('last_name');
+            $table->string('display_name')->nullable();
             $table->string('type')->nullable();
             $table->string('company')->nullable();
             $table->string('phone_number')->unique()->nullable();
