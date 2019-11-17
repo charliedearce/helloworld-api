@@ -13,15 +13,21 @@ use Illuminate\Http\Request;
 |
 */
 
+
+
 Route::post('/login', 'AuthController@login');
 Route::post('/register-client', 'AuthController@registerClient');
 Route::post('/social-client', 'AuthController@registerClientSocial');
 Route::post('/register-therapist', 'AuthController@registerTherapist');
 
-
-Route::group(['middleware' => 'auth:api'], function(){
-    Route::get('/test', 'AuthController@details');
+Route::group(['middleware' => ['auth:api']], function(){
     Route::post('/logout', 'AuthController@logout');
+
+    Route::get('/profile', 'SettingsController@profileDetails');
+    Route::post('/profile', 'SettingsController@updateProfile');
+    Route::post('/changepassword', 'SettingsController@changePassword');
+
+    Route::post('/image', 'SettingsController@uploadImage');
 });
 
 

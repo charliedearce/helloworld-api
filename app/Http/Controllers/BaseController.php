@@ -3,22 +3,29 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Repository\AuthRepository;
 use Illuminate\Support\Facades\Auth;
+
+use App\Repository\AuthRepository;
+use App\Repository\SettingsRepository;
 
 class BaseController extends Controller
 {
     protected $authRepository;
+    protected $settingsRepository;
 
     protected $user_info;
 
     public function __construct(
         Request $request,
-        AuthRepository $authRepository
+        AuthRepository $authRepository,
+        SettingsRepository $settingsRepository
     )
     {
         $this->authRepository = $authRepository;
+        $this->settingsRepository = $settingsRepository;
+
         $this->now = date("Y-m-d H:i:s");
+
         $this->user_info = Auth::user();
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -38,32 +37,36 @@ class AuthController extends BaseController
 
         $fields['type'] = 1;
 
+        unset($fields['c_password']);
+
         $rs = $this->authRepository;
 
         $user = $rs->createAccount($fields);
 
         $accessToken = $user->createToken('authToken')->accessToken;
-        return response(['access_token'=> $accessToken]);
+        return response(['access_token'=> $accessToken,'type' => $user->type]);
     }
 
     public function registerClientSocial(Request $request)
     {
         $fields = [
-            'first_name' => $request->input('first_name'),
-            'last_name' => $request->input('last_name'),
+            'display_name' => $request->input('display_name'),
             'email'=> $request->input('email'),
             'social_id'=> $request->input('social_id'),
+            'image'=> $request->input('image'),
         ];
 
         $conditions = [
-            'first_name' => 'required|alpha_spaces',
-            'last_name' => 'required|alpha_spaces',
+            'display_name' => 'required',
             'email'=>'email|required|email',
-            'social_id' => 'required|numeric',
+            'social_id' => 'required',
+            'image' => 'nullable|url',
         ];
 
         $validator = Validator::make($fields, $conditions);
+
         $accessToken = '';
+
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()->all()], 200);
         }
@@ -74,31 +77,21 @@ class AuthController extends BaseController
         $data = $rs->checkEmailExists($fields['email']);
 
         if(!empty($data)){
-            if($data->social_id === null){
-                 $res = $rs->updateUserByEmail($data->email, ['social_id' => $fields['social_id'], 'password' => $fields['password']]);
+            if(empty($data->social_id)){
+                 $res = $rs->updateUserByEmail($data->email, ['social_id' => $fields['social_id']]);
                 if($res) {
-                    $data = [
-                        'grant_type' => 'password',
-                        'client_id' => ENV('AUTH_ID'),
-                        'client_secret' => ENV('AUTH_KEY'),
-                        'username' => $fields['email'],
-                        'password' => $fields['social_id'],
-                        'scope' => '*',
-                    ];
-
-                    $accessToken = json_decode($this->curlPOST(ENV('APP_URL').'/oauth/token', $data))->access_token;
+                    $user = $rs->checkEmailSocialId($data->email, $fields['social_id']);
+                    $accessToken = $user->createToken('authToken')->accessToken;
+                } else {
+                    return response(['message'=> 'unauthorized']);
                 }
             } else {
-                $data = [
-                    'grant_type' => 'password',
-                    'client_id' => ENV('AUTH_ID'),
-                    'client_secret' => ENV('AUTH_KEY'),
-                    'username' => $fields['email'],
-                    'password' => $fields['social_id'],
-                    'scope' => '*',
-                ];
-
-                $accessToken = json_decode($this->curlPOST(ENV('APP_URL').'/oauth/token', $data))->access_token;
+                $user = $rs->checkEmailSocialId($data->email, $fields['social_id']);
+                if($user){
+                    $accessToken = $user->createToken('authToken')->accessToken;
+                } else {
+                    return response(['message'=> 'unauthorized']);
+                }
             }
         } else {
             $user = $rs->createAccount($fields);
@@ -106,7 +99,7 @@ class AuthController extends BaseController
         }
 
 
-        return response(['access_token'=> $accessToken]);
+        return response(['access_token'=> $accessToken, 'type' => $user->type]);
 
     }
 
@@ -132,12 +125,9 @@ class AuthController extends BaseController
             return response(['message'=> 'unauthorized']);
         }
 
-        return response(['access_token'=> $accessToken->access_token]);
-    }
+        $user = $this->authRepository->checkEmailExists($loginData['email']);
 
-    public function details()
-    {
-        return response()->json(['success' => $this->user_info]);
+        return response(['access_token'=> $accessToken->access_token, 'type' => $user->type]);
     }
 
     public function logout(Request $request)
@@ -156,9 +146,9 @@ class AuthController extends BaseController
             'email'=> $request->input('email'),
             'password'=> $request->input('password'),
             'c_password' => $request->input('c_password'),
-            'license_number' => $request->input('c_password'),
-            'license_state' => $request->input('c_password'),
-            'phone_number' => $request->input('c_password'),
+            'license_number' => $request->input('license_number'),
+            'license_state' => $request->input('license_state'),
+            'phone_number' => $request->input('phone_number'),
             'company' => $request->input('company'),
         ];
 
@@ -169,8 +159,8 @@ class AuthController extends BaseController
             'password'=>'required|min:6',
             'c_password' => 'required|same:password',
             'license_number' => 'required',
-            'license_state' => 'required',
-            'phone_number' => 'required',
+            'license_state' => 'required|alpha_spaces',
+            'phone_number' => 'required|numeric',
             'company' => 'required',
         ];
 
@@ -180,16 +170,27 @@ class AuthController extends BaseController
             return response()->json(['message' => $validator->errors()->all()], 200);
         }
 
+        $rs = $this->authRepository;
+
+        if($rs->checkPhoneNumber($fields['phone_number']) === true){
+            return response()->json(['message' => 'phone number already exists'], 200);
+        }
+
+        if($rs->checkLicenseNumber($fields['license_number']) === true){
+            return response()->json(['message' => 'license number already exists'], 200);
+        }
+
+
         $fields['password'] = Hash::make($fields['password']);
 
         $fields['type'] = 2;
 
-        $rs = $this->authRepository;
+        unset($fields['c_password']);
 
         $user = $rs->createAccount($fields);
 
         $accessToken = $user->createToken('authToken')->accessToken;
 
-        return response(['access_token'=> $accessToken]);
+        return response(['access_token'=> $accessToken, 'type' => 2]);
     }
 }

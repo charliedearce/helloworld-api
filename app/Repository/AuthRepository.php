@@ -17,4 +17,20 @@ class AuthRepository
     {
         return User::where('email',$email)->update($data);
     }
+
+    public function checkEmailSocialId($email, $social_id)
+    {
+        return User::where('email', $email)->where('social_id', $social_id)->first();
+    }
+
+    public function checkPhoneNumber($number)
+    {
+        return User::where('phone_number', $number)->exists();
+    }
+
+    public function checkLicenseNumber($license_number)
+    {
+        return User::where('license_number', $license_number)->exists();
+    }
+
 }
