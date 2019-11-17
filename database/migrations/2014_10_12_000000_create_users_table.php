@@ -18,8 +18,8 @@ class CreateUsersTable extends Migration
             $table->string('social_id')->unique()->nullable();
             $table->string('image')->nullable();
             $table->string('bio')->nullable();
-            $table->string('first_name');
-            $table->string('last_name');
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
             $table->string('display_name')->nullable();
             $table->integer('type');
             $table->string('company')->nullable();
