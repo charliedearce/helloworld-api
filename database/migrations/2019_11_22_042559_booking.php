@@ -20,7 +20,7 @@ class Booking extends Migration
             $table->integer('duration');
             $table->string('massage_type');
             $table->string('location');
-            $table->int('cater');
+            $table->integer('cater');
             $table->timestamps();
         });
     }
