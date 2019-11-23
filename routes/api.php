@@ -28,6 +28,11 @@ Route::group(['middleware' => ['auth:api']], function(){
     Route::post('/changepassword', 'SettingsController@changePassword');
 
     Route::post('/image', 'SettingsController@uploadImage');
+
+    Route::post('/therapist-status', 'BookingController@therapistStatus');
+    Route::get('/therapist-status', 'BookingController@getTherapistStatusInfos');
+    Route::get('/therapist', 'BookingController@getTherapistList');
+
 });
 
 

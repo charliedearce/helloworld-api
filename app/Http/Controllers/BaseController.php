@@ -7,22 +7,26 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Repository\AuthRepository;
 use App\Repository\SettingsRepository;
+use App\Repository\BookingRepository;
 
 class BaseController extends Controller
 {
     protected $authRepository;
     protected $settingsRepository;
+    protected $bookingRepository;
 
     protected $user_info;
 
     public function __construct(
         Request $request,
         AuthRepository $authRepository,
-        SettingsRepository $settingsRepository
+        SettingsRepository $settingsRepository,
+        BookingRepository $bookingRepository
     )
     {
         $this->authRepository = $authRepository;
         $this->settingsRepository = $settingsRepository;
+        $this->bookingRepository = $bookingRepository;
 
         $this->now = date("Y-m-d H:i:s");
 

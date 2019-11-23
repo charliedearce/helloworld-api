@@ -133,6 +133,7 @@ class AuthController extends BaseController
     public function logout(Request $request)
     {
         $request->user()->token()->revoke();
+        $this->bookingRepository->deleteAvailableTherapist($this->user_info->id);
         return response()->json([
             'message' => 'successfully logged out'
         ]);

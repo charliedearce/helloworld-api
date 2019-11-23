@@ -16,7 +16,7 @@ class Booking extends Migration
         Schema::create('bookings', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('therapist_user_id');
-            $table->string('client_user_id');
+            $table->integer('client_user_id');
             $table->integer('duration');
             $table->string('massage_type');
             $table->string('location');
